@@ -1,10 +1,10 @@
-package bezbednost.kt1.bezbednostprojekat;
+package Busep;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BezbednostProjekatApplicationTests {
+class BusepApplicationTests {
 
 	@Test
 	void contextLoads() {

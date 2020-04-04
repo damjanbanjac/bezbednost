@@ -1,13 +1,13 @@
-package bezbednost.kt1.bezbednostprojekat;
+package Busep;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BezbednostProjekatApplication {
+public class BusepApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BezbednostProjekatApplication.class, args);
+		SpringApplication.run(BusepApplication.class, args);
 	}
 
 }
