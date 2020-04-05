@@ -1,5 +1,6 @@
 package keyStore;
 
+import javax.crypto.SecretKey;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -64,4 +65,30 @@ public class KeyStoreWriter {
             e.printStackTrace();
         }
     }
+
+    private KeyPair generateKeyPair() {
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            keyGen.initialize(2048, random);
+            return keyGen.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void generateSecretKey() throws KeyStoreException {
+        SecretKey secretKey = null;
+        KeyStore.SecretKeyEntry secret
+                = new KeyStore.SecretKeyEntry(secretKey);
+        char[] pwdArray ="tim14".toCharArray();
+        KeyStore.ProtectionParameter password
+                = new KeyStore.PasswordProtection(pwdArray);
+        keyStore.setEntry("db-encryption-secret", secret, password);
+
+    };
+
 }
