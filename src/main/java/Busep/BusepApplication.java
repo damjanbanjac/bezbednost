@@ -28,18 +28,18 @@ public class BusepApplication {
 
 
 		ks.loadKeyStore("rootCertificate.jks",array);
-		//ks.saveKeyStore("endCertificate.jks", array);
+
 		KeyPair rootCertKeyPar = ks.generateKeyPair();
 
 		CertificateGenerator certificate = new CertificateGenerator();
 		Certificate cert = certificate.generate(rootCertKeyPar, "SHA256WithRSAEncryption", "RootCert", 7300);
 
 		char[] rootpass = "root".toCharArray();
-		ks.write("root", rootCertKeyPar.getPrivate(), rootpass, cert);
-
+		ks.write("root", rootCertKeyPar.getPrivate(), array, cert);
+		ks.saveKeyStore("rootCertificate.jks", array);
 		KeyStoreReader kr=new KeyStoreReader();
-		kr.readCertificate("rootCertificate.jks", "tim14", "root");
-		System.out.println(cert);
+		Certificate certRoot = kr.readCertificate("rootCertificate.jks", "tim14", "root"); // kako izlastati sve sertifikate
+		System.out.println(certRoot);
 
 	}
 

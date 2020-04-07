@@ -14,6 +14,8 @@ import java.util.Date;
 
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.X500NameBuilder;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509ExtensionUtils;
@@ -34,6 +36,7 @@ public class CertificateGenerator {
     public CertificateGenerator() {
     }
 
+
     public static X509Certificate generate(final KeyPair keyPair,
                                            final String hashAlgorithm,
                                            final String cn,
@@ -45,21 +48,26 @@ public class CertificateGenerator {
 
         final ContentSigner contentSigner = new JcaContentSignerBuilder(hashAlgorithm).build(keyPair.getPrivate());
         final X500Name x500Name = new X500Name("CN=" + cn);
+        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
+        builder.addRDN(BCStyle.CN,  cn);
+        builder.addRDN(BCStyle.UID, "123456"); // da li hesovati id  ida li to se genericki dobija
 
-        KeyUsage keyUsage = new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign);
+
+        KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign);
 
         final X509v3CertificateBuilder certificateBuilder =
-                new JcaX509v3CertificateBuilder(x500Name,
+                new JcaX509v3CertificateBuilder(builder.build(),
                         BigInteger.valueOf(now.toEpochMilli()),
                         notBefore,
                         notAfter,
-                        x500Name,
+                        builder.build(),
                         keyPair.getPublic())
                         .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
                         .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
                         .addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
-                        .addExtension(Extension.keyUsage, true, keyUsage);
-                        //.addExtension(keyUsage.keyCertSign);
+                        .addExtension(Extension.keyUsage, true, keyUse);
+
+
 
         return new JcaX509CertificateConverter()
                 .setProvider(new BouncyCastleProvider()).getCertificate(certificateBuilder.build(contentSigner));
