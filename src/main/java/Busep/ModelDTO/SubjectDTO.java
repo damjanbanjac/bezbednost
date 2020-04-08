@@ -22,4 +22,7 @@ public class SubjectDTO {
 
     @JsonFormat(pattern = "dd/MM/yy")
     private Date date;
+
+    public SubjectDTO(int id, String mejl, String surname, String name, String organisation, String orgUnit) {
+    }
 }
