@@ -25,9 +25,9 @@ public class SubjectController {
         subjectService.newSubject(subjectDTO);
     }
 
-    @GetMapping()
+    @GetMapping(value = "/zahteviSubjekata")
     public ResponseEntity<List<SubjectDTO>> getAllSubjects() {
-        List<Subject> subjects = subjectService.getAllSubjects();
+        List<Subject> subjects = subjectService.findAll();
         List<SubjectDTO> subjectDTOList = new ArrayList<>();
         for(Subject subject : subjects) {
             subjectDTOList.add(new SubjectDTO(subject));
