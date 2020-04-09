@@ -25,7 +25,7 @@ public class SubjectService {
         subjectRepository.save(subject);
     }
 
-    public List<Subject> getAllSubjects() {
+    public List<Subject> findAll() {
         return subjectRepository.findAll();
     }
 }
