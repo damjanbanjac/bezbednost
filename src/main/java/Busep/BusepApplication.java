@@ -54,18 +54,20 @@ public class BusepApplication {
 		ks.loadKeyStore("endCertificate.jks",array);
 		//char[] rootpass = "root".toCharArray();
 		KeyPair keyPair = ks.generateKeyPair();
+		SubjectDTO subject2 = new SubjectDTO();
+		subject2.setId((long) 5);
 		SubjectDTO subject = new SubjectDTO(1,"siman@gmail.com","simeunovic","bojan","ftn","odsek");
-		subject.setId((long) 1);
+		subject.setId((long) 9);
 		subject.setName("bojan");
 		subject.setEmail("imejl");
 		subject.setSurname("simeunovic");
 		subject.setOrganisation("ftn");
 		subject.setOrgUnit("e2");
-		Certificate certIn = certificate.generateInter(subject,keyPair ,"SHA256WithRSAEncryption",5300);
-		ks.write("inter", keyPair.getPrivate() , array, certIn);
+		Certificate certIn = certificate.generateInterAndEnd(subject,subject2,keyPair ,"SHA256WithRSAEncryption",1300);
+		ks.write(subject.getId().toString(), keyPair.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
 		ks.saveKeyStore("endCertificate.jks", array);
 
-		Certificate certRooti = kr.readCertificate("endCertificate.jks", "tim14", "inter"); // kako izlastati sve sertifikate
+		Certificate certRooti = kr.readCertificate("endCertificate.jks", "tim14", subject.getId().toString()); // kako izlastati sve sertifikate
 		System.out.println(certRooti);
 
 		// String c = certRoot.toString();
