@@ -22,10 +22,17 @@ public class SubjectService {
         subject.setSurname(request.getSurname());
         subject.setOrganisation(request.getOrganisation());
         subject.setOrgUnit(request.getOrgUnit());
+        subject.setCA(false);
+        subject.setCert(false);
         subjectRepository.save(subject);
     }
 
     public List<Subject> findAll() {
         return subjectRepository.findAll();
     }
+
+    public Subject findOne(Long id) {
+        return subjectRepository.findById(id).orElseGet(null);
+    }
+
 }
