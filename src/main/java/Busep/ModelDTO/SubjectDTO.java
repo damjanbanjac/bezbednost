@@ -28,7 +28,11 @@ public class SubjectDTO {
     @JsonFormat(pattern = "dd/MM/yy")
     private Date date;
 
-    public SubjectDTO(int id, String mejl, String surname, String name, String organisation, String orgUnit) {
+    private boolean isCA;
+
+    private boolean cert;
+
+    public SubjectDTO(int id, String mejl, String surname, String name, String organisation, String orgUnit, boolean isCA, boolean cert) {
     }
 
     public SubjectDTO(Subject subject) {
@@ -39,6 +43,8 @@ public class SubjectDTO {
         this.organisation = subject.getOrganisation();
         this.orgUnit = subject.getOrgUnit();
         this.date = subject.getDate();
+        this.isCA = subject.isCA();
+        this.cert = subject.isCert();
     }
 
 }

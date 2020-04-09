@@ -31,4 +31,10 @@ public class Subject {
     private String orgUnit;
 
     private Date date;
+
+    private boolean isCA;
+
+    private boolean cert;
+
+
 }
