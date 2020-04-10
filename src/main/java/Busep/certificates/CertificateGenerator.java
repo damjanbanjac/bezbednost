@@ -9,6 +9,8 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -82,7 +84,7 @@ public class CertificateGenerator {
         System.out.println(pk);
         final ContentSigner contentSigner = new JcaContentSignerBuilder(hashAlgorithm).build(pk);
 
-
+        Boolean isCa = subjectDTO.isCA();
 
         KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign);
         X509Certificate certRoot = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subjectDTO2.getId().toString());
@@ -96,8 +98,8 @@ public class CertificateGenerator {
                         keyPair.getPublic())
                         .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
                         .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
-                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
-                        .addExtension(Extension.keyUsage, true, keyUse);
+                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+                       // .addExtension(Extension.keyUsage, true, keyUse);
 
 
 
@@ -114,7 +116,7 @@ public class CertificateGenerator {
                                            final String hashAlgorithm,
 
                                            final int days)
-            throws OperatorCreationException, CertificateException, IOException {
+            throws OperatorCreationException, CertificateException, IOException, ParseException {
 
         System.out.println(subjectDTO.getName());
         X500NameBuilder nameBuilder = new X500NameBuilder(BCStyle.INSTANCE);
@@ -147,6 +149,16 @@ public class CertificateGenerator {
         KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign);
        X509Certificate certRoot = (X509Certificate) kr.readCertificate("rootCertificate.jks", "tim14", "root");
 
+       Date certRDate = certRoot.getNotAfter();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        if(certRDate.compareTo(notAfter) > 0) {
+            System.out.println("veci je");
+        }
+
+        Boolean isCa = subjectDTO.isCA();
+
         final X509v3CertificateBuilder certificateBuilder =
                 new JcaX509v3CertificateBuilder( certRoot,
                         BigInteger.valueOf(now.toEpochMilli()),
@@ -156,8 +168,8 @@ public class CertificateGenerator {
                         keyPair.getPublic())
                         .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
                         .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
-                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
-                        .addExtension(Extension.keyUsage, true, keyUse);
+                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+                       // .addExtension(Extension.keyUsage, true, keyUse);
 
 
 

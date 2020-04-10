@@ -30,7 +30,22 @@ public class SubjectController {
         List<Subject> subjects = subjectService.findAll();
         List<SubjectDTO> subjectDTOList = new ArrayList<>();
         for(Subject subject : subjects) {
-            subjectDTOList.add(new SubjectDTO(subject));
+            if(subject.isCert() == false) {
+                subjectDTOList.add(new SubjectDTO(subject));
+            }
+        }
+
+        return new ResponseEntity<>(subjectDTOList, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/CAsubjekti")
+    public ResponseEntity<List<SubjectDTO>> getAllSubjectsCA() {
+        List<Subject> subjects = subjectService.findAll();
+        List<SubjectDTO> subjectDTOList = new ArrayList<>();
+        for(Subject subject : subjects) {
+            if(subject.isCert() == true && subject.isCA() == true) {
+                subjectDTOList.add(new SubjectDTO(subject));
+            }
         }
 
         return new ResponseEntity<>(subjectDTOList, HttpStatus.OK);
