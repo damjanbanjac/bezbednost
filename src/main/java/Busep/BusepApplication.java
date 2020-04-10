@@ -26,11 +26,11 @@ public class BusepApplication {
 
 	public static void main(String[] args) throws CertificateException, IOException, OperatorCreationException, KeyStoreException {
 		SpringApplication.run(BusepApplication.class, args);
-		KeyStore ksf = null;
+		/*KeyStore ksf = null;
 		KeyStoreWriter ks=new KeyStoreWriter();
 		char[] array = "tim14".toCharArray();
 
-		ks.loadKeyStore("endCertificate.jks",array);
+		//ks.loadKeyStore("endCertificate.jks",array);
 		//ks.loadKeyStore("rootCer.jks",array);
 		//ks.saveKeyStore("rootCer.jks",array);
 		//KeyPair rootCertKeyPar = ks.generateKeyPair();
@@ -74,7 +74,7 @@ public class BusepApplication {
 		//System.out.println(certRooti);
 
 		// String c = certRoot.toString();
-		//System.out.println(certRooti);
+		//System.out.println(certRooti); */
 
 	}
 

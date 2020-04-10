@@ -84,7 +84,7 @@ public class CertificateGenerator {
         System.out.println(pk);
         final ContentSigner contentSigner = new JcaContentSignerBuilder(hashAlgorithm).build(pk);
 
-
+        Boolean isCa = subjectDTO.isCA();
 
         KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign);
         X509Certificate certRoot = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subjectDTO2.getId().toString());
@@ -98,8 +98,8 @@ public class CertificateGenerator {
                         keyPair.getPublic())
                         .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
                         .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
-                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
-                        .addExtension(Extension.keyUsage, true, keyUse);
+                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+                       // .addExtension(Extension.keyUsage, true, keyUse);
 
 
 
@@ -157,6 +157,7 @@ public class CertificateGenerator {
             System.out.println("veci je");
         }
 
+        Boolean isCa = subjectDTO.isCA();
 
         final X509v3CertificateBuilder certificateBuilder =
                 new JcaX509v3CertificateBuilder( certRoot,
@@ -167,8 +168,8 @@ public class CertificateGenerator {
                         keyPair.getPublic())
                         .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
                         .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
-                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
-                        .addExtension(Extension.keyUsage, true, keyUse);
+                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+                       // .addExtension(Extension.keyUsage, true, keyUse);
 
 
 
