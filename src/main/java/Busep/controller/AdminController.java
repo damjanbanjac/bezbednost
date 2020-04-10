@@ -9,17 +9,27 @@ import Busep.Services.SubjectService;
 import Busep.certificates.CertificateGenerator;
 import Busep.model.Admin;
 import Busep.model.Subject;
+import keyStore.KeyStoreReader;
 import keyStore.KeyStoreWriter;
+import org.bouncycastle.asn1.dvcs.Data;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.sql.SQLOutput;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -108,5 +118,76 @@ public class AdminController {
         ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
         ks.saveKeyStore("endCertificate.jks", array);
         System.out.println(certIn);
+    };
+
+    @GetMapping(value = "/getDani")
+    public ArrayList<?> dozvoljeniDani(){
+        ArrayList<Integer> dozvoljeni= new ArrayList<Integer>();
+        char[] array = "tim14".toCharArray();
+
+        KeyStoreWriter ks=new KeyStoreWriter();
+        ks.loadKeyStore("rootCertificate.jks",array);
+        KeyStoreReader kr=new KeyStoreReader();
+
+        X509Certificate certRoot = (X509Certificate) kr.readCertificate("rootCertificate.jks", "tim14", "root");
+        Instant now = Instant.now();
+        Date pocetniDan = Date.from(now);
+        System.out.println(pocetniDan + "pocetni dan");
+        Date dan = certRoot.getNotAfter();
+        System.out.println(dan + "krajnji dan");
+        LocalDate localDate = dan.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        System.out.println(localDate + "krajnji dan konvertovan");
+        LocalDate pocetni = pocetniDan.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        System.out.println(pocetni + "pocetni dan konvertovan");
+        //Period period =  Period.between(pocetni, localDate);
+        //System.out.println(period + "period izmedju pocetnog i krajnjeg dana");
+        long daysBetween = ChronoUnit.DAYS.between(pocetni, localDate);
+        //int diff = period.getDays();
+        System.out.println(daysBetween + "ukupno dana izmedju pocetnog i krjanjeg datuma");
+
+        int godine=(int)daysBetween/365;
+        for(int i=1; i<=godine; i++){
+            dozvoljeni.add(365*i);
+            System.out.println(365*i);
+        }
+
+        return dozvoljeni;
+    };
+
+    @GetMapping(value = "/getDaniIntermediate/{id}")
+    public ArrayList<?> dozvoljeniDaniIntermediate(@PathVariable String id){
+        ArrayList<Integer> dozvoljeni= new ArrayList<Integer>();
+        char[] array = "tim14".toCharArray();
+        System.out.println(id+"ovo je nas id");
+
+        KeyStoreWriter ks=new KeyStoreWriter();
+        ks.loadKeyStore("endCertificate.jks",array);
+
+        KeyStoreReader kr=new KeyStoreReader();
+
+        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
+
+        Instant now = Instant.now();
+        Date pocetniDan = Date.from(now);
+        System.out.println(pocetniDan + "pocetni dan");
+        Date dan = cert.getNotAfter();
+        System.out.println(dan + "krajnji dan");
+        LocalDate localDate = dan.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        System.out.println(localDate + "krajnji dan konvertovan");
+        LocalDate pocetni = pocetniDan.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        System.out.println(pocetni + "pocetni dan konvertovan");
+        //Period period =  Period.between(pocetni, localDate);
+        //System.out.println(period + "period izmedju pocetnog i krajnjeg dana");
+        long daysBetween = ChronoUnit.DAYS.between(pocetni, localDate);
+        //int diff = period.getDays();
+        System.out.println(daysBetween + "ukupno dana izmedju pocetnog i krjanjeg datuma");
+
+        int godine=(int)daysBetween/365;
+        for(int i=1; i<=godine; i++){
+            dozvoljeni.add(365*i);
+            System.out.println(365*i);
+        }
+
+        return dozvoljeni;
     };
 }
