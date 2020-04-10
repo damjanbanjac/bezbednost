@@ -9,6 +9,8 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -114,7 +116,7 @@ public class CertificateGenerator {
                                            final String hashAlgorithm,
 
                                            final int days)
-            throws OperatorCreationException, CertificateException, IOException {
+            throws OperatorCreationException, CertificateException, IOException, ParseException {
 
         System.out.println(subjectDTO.getName());
         X500NameBuilder nameBuilder = new X500NameBuilder(BCStyle.INSTANCE);
@@ -146,6 +148,15 @@ public class CertificateGenerator {
 
         KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign);
        X509Certificate certRoot = (X509Certificate) kr.readCertificate("rootCertificate.jks", "tim14", "root");
+
+       Date certRDate = certRoot.getNotAfter();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        if(certRDate.compareTo(notAfter) > 0) {
+            System.out.println("veci je");
+        }
+
 
         final X509v3CertificateBuilder certificateBuilder =
                 new JcaX509v3CertificateBuilder( certRoot,
