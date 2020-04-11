@@ -39,4 +39,14 @@ public class OCSPService {
             }
         }
 
+    public boolean revokeCertificate(X509Certificate certificate, long id) throws NullPointerException {
+        OCSP ocsp1 = ocspRepository.findOneBySerialNumber(certificate.getSerialNumber());
+        if(ocsp1 == null){
+            OCSP ocsp2 = new OCSP();
+            ocsp2.setAdminId(id);
+            ocsp2.setSerialNumber(certificate.getSerialNumber());
+            ocspRepository.save(ocsp2);
+        } //mozemo staviti exception da nam napise da je mozda vec bio povucen ako ne udje u if
+        return true;
+    }
 }
