@@ -2,9 +2,17 @@ package Busep.Services;
 
 import Busep.Repository.OCSPRepository;
 import Busep.model.OCSP;
+import keyStore.KeyStoreReader;
+import keyStore.KeyStoreWriter;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
@@ -32,21 +40,28 @@ public class OCSPService {
         return ocspRepository.findAllByAdminId(id);
     }
 
-    public boolean checkValidityOfOneCertificate(X509Certificate certificate, X509Certificate issuerCert) throws NullPointerException {
+    public boolean checkValidityOfOneCertificate(X509Certificate certificate) throws NullPointerException {
         OCSP revokedCert = ocspRepository.findOneBySerialNumber(certificate.getSerialNumber());
+        String p = "";
         if (revokedCert != null) {
+            p = "false";
+            System.out.println(p);
             return false; //povucen je
+
         }
         else {
+            p = "true";
+            System.out.println(p);
             return true; //nije povucen
         }
+
     }
 
-    public boolean revokeCertificate(X509Certificate certificate, long id) throws NullPointerException {
+    public boolean revokeCertificate(X509Certificate certificate) throws NullPointerException {
         OCSP ocsp1 = ocspRepository.findOneBySerialNumber(certificate.getSerialNumber());
         if(ocsp1 == null){
             OCSP ocsp2 = new OCSP();
-            ocsp2.setAdminId(id);
+
             ocsp2.setSerialNumber(certificate.getSerialNumber());
             ocspRepository.save(ocsp2);
         } //mozemo staviti exception da nam napise da je mozda vec bio povucen ako ne udje u if
@@ -61,32 +76,62 @@ public class OCSPService {
         return true;
     }
 
-    public Boolean checkValidityOfParents(X509Certificate certificate) throws NullPointerException {
+    public Boolean checkValidityOfParents(X509Certificate certificate) throws NullPointerException, CertificateEncodingException {
         X509Certificate parent = null; //treba mu nekako izvuci parenta od certificate
+        KeyStoreWriter ks=new KeyStoreWriter();
+        char[] array = "tim14".toCharArray();
+
+        X500Name x500name = new JcaX509CertificateHolder(certificate).getIssuer();
+        RDN  uid = x500name.getRDNs(BCStyle.UID)[0];
+        String alias = IETFUtils.valueToString(uid.getFirst().getValue());
+        System.out.println(alias);
+
+        ks.loadKeyStore("endCertificate.jks",array);
+        KeyStoreReader kr = new KeyStoreReader();
+        parent = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", alias);
 
         boolean validity;
-        validity = checkValidityOfOneCertificate(certificate, parent);
+        boolean p = false;
+        validity = checkValidityOfOneCertificate(certificate);
 
         String currentDate = java.time.LocalDate.now().toString();
+        String end = "";
+     // while(true) {//end.equals("")){
 
-        while(true){
+          System.out.println("usao u while");
 
-            if(!checkDate(certificate, currentDate))
-            return false;
-
-            if(!validity)
+            if(!validity) {
+                //end = "notValid";
+                p = false;
                 return false;
-
-            if(false)
-                return false; //ovde treba proveriti digitalni potpis
+            }
 
 
-            if(certificate.equals(parent))
+            /*if(false)
+                return false; */ //ovde treba proveriti digitalni potpis
+
+           else  if (alias.equals("123456")) {
+                System.out.println("usao");
+                end = "end";
+                p = true;
                 return true;
 
-            checkValidityOfParents(parent);
-        }
+            }
 
+           /* if(certificate.equals(parent))
+                return true; */
+           else  {
+              System.out.println("prosao");
+             return checkValidityOfParents(parent);
+
+        //  }
+
+        }
+    /*if(end.equals("notValid")) {
+        return false;
+    } else  {
+        return true;
+    } */
     }
 
     private boolean checkDate(X509Certificate certificate, String date){
