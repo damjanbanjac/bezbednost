@@ -44,9 +44,6 @@ public class CertificateGenerator {
     public CertificateGenerator() {
     }
 
-
-
-
     public static X509Certificate generateInterAndEnd(
             SubjectDTO subjectDTO,
             SubjectDTO subjectDTO2,
