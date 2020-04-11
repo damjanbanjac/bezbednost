@@ -120,11 +120,11 @@ public class AdminController {
         System.out.println(certIn);
     };
 
-    @GetMapping(value = "/getDani")
-    public ArrayList<?> dozvoljeniDani(){
+    @GetMapping(value = "/getDani/{check}")
+    public ArrayList<?> dozvoljeniDani(@PathVariable String check){
         ArrayList<Integer> dozvoljeni= new ArrayList<Integer>();
         char[] array = "tim14".toCharArray();
-
+        System.out.println("ovo je check" + check);
         KeyStoreWriter ks=new KeyStoreWriter();
         ks.loadKeyStore("rootCertificate.jks",array);
         KeyStoreReader kr=new KeyStoreReader();
@@ -146,16 +146,27 @@ public class AdminController {
         System.out.println(daysBetween + "ukupno dana izmedju pocetnog i krjanjeg datuma");
 
         int godine=(int)daysBetween/365;
+        int maxYear = 0;
+        if(check.equals("true")) {
+
+            maxYear = 15;
+        } else {
+            maxYear = 10;
+        }
         for(int i=1; i<=godine; i++){
+
             dozvoljeni.add(365*i);
             System.out.println(365*i);
+            if( i == maxYear) {
+                break;
+            }
         }
 
         return dozvoljeni;
     };
 
-    @GetMapping(value = "/getDaniIntermediate/{id}")
-    public ArrayList<?> dozvoljeniDaniIntermediate(@PathVariable String id){
+    @GetMapping(value = "/getDaniIntermediate/{id}/{check}")
+    public ArrayList<?> dozvoljeniDaniIntermediate(@PathVariable String id,@PathVariable String check){
         ArrayList<Integer> dozvoljeni= new ArrayList<Integer>();
         char[] array = "tim14".toCharArray();
         System.out.println(id+"ovo je nas id");
@@ -182,10 +193,21 @@ public class AdminController {
         //int diff = period.getDays();
         System.out.println(daysBetween + "ukupno dana izmedju pocetnog i krjanjeg datuma");
 
+        int maxYear = 0;
+        if(check.equals("true")) {
+
+            maxYear = 15;
+        } else {
+            maxYear = 10;
+        }
+
         int godine=(int)daysBetween/365;
         for(int i=1; i<=godine; i++){
             dozvoljeni.add(365*i);
             System.out.println(365*i);
+            if( i == maxYear) {
+                break;
+            }
         }
 
         return dozvoljeni;
