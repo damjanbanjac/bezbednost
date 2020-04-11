@@ -49,4 +49,12 @@ public class OCSPService {
         } //mozemo staviti exception da nam napise da je mozda vec bio povucen ako ne udje u if
         return true;
     }
+
+    public boolean denyRevokation(X509Certificate certificate, long id) throws NullPointerException {
+        OCSP ocsp = ocspRepository.findOneBySerialNumber(certificate.getSerialNumber());
+        if (ocsp != null && ocsp.getAdminId() == id){
+            ocspRepository.deleteById(ocsp.getId());
+        } //mozemo staviti exception ako slucajno nije bio obrisan
+        return true;
+    }
 }
