@@ -18,6 +18,7 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -91,10 +92,13 @@ public class OCSPService {
         parent = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", alias);
 
         boolean validity;
+        boolean validityData;
         boolean p = false;
         validity = checkValidityOfOneCertificate(certificate);
 
         String currentDate = java.time.LocalDate.now().toString();
+        System.out.println(currentDate);
+        validityData = checkDate(certificate);
         String end = "";
      // while(true) {//end.equals("")){
 
@@ -105,6 +109,14 @@ public class OCSPService {
                 p = false;
                 return false;
             }
+
+        if(!validityData) {
+            //end = "notValid";
+            p = false;
+            return false;
+        }
+
+
 
 
             /*if(false)
@@ -118,8 +130,7 @@ public class OCSPService {
 
             }
 
-           /* if(certificate.equals(parent))
-                return true; */
+
            else  {
               System.out.println("prosao");
              return checkValidityOfParents(parent);
@@ -127,29 +138,33 @@ public class OCSPService {
         //  }
 
         }
-    /*if(end.equals("notValid")) {
-        return false;
-    } else  {
-        return true;
-    } */
+
     }
 
-    private boolean checkDate(X509Certificate certificate, String date){
+    private boolean checkDate(X509Certificate certificate){
         SimpleDateFormat iso8601Formater = new SimpleDateFormat("yyyy-MM-dd");
 
         if(certificate == null){
             return false;
         }
-        try {
-            Date currentDate = iso8601Formater.parse(date);
-            certificate.checkValidity(currentDate);
-            return true;
-        }catch(CertificateExpiredException e) {
-        }catch(CertificateNotYetValidException e) {
-        }catch (ParseException e) {
-        }
 
-        return false;
+
+            Date certDate = certificate.getNotAfter();
+            final Instant now = Instant.now();
+            final Date nowDate = Date.from(now);
+            if(certDate.compareTo(nowDate) > 0) {
+                System.out.println(certDate);
+                System.out.println(nowDate);
+                System.out.println("veci je");
+                return true;
+            }
+            else {
+                return false;
+            }
+
+
+
+
     }
 
 }
