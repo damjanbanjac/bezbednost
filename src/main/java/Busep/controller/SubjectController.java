@@ -51,5 +51,18 @@ public class SubjectController {
         return new ResponseEntity<>(subjectDTOList, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/preuzmi/{id}")
+    public ResponseEntity<?> getSubject(@PathVariable String id) {
+
+        long idSubject = Long.parseLong(id);
+
+        Subject subject = subjectService.findOne((idSubject));
+
+        SubjectDTO subjectDTO = new SubjectDTO(subject);
+
+
+        return new ResponseEntity<>(subjectDTO, HttpStatus.OK);
+    }
+
 
 }
