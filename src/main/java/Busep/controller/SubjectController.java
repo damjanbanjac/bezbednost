@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -92,6 +95,25 @@ public class SubjectController {
 
 
         return new ResponseEntity<>(subjectDTO, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/preuzmiDatum/{id}")
+    public ResponseEntity<?> getSubjectEndDate(@PathVariable String id) {
+
+        long idSubject = Long.parseLong(id);
+
+        Subject subject = subjectService.findOne((idSubject));
+
+        KeyStoreWriter ks=new KeyStoreWriter();
+        char[] array = "tim14".toCharArray();
+        ks.loadKeyStore("endCertificate.jks",array);
+        KeyStoreReader kr = new KeyStoreReader();
+
+        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subject.getId().toString());
+        Date datum = cert.getNotAfter();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        String datumString = dateFormat.format(datum);
+        return new ResponseEntity<>(datumString, HttpStatus.OK);
     }
 
 
