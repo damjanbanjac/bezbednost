@@ -20,7 +20,19 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.lang.reflect.Field;
+
+import sun.misc.BASE64Encoder;
+import sun.security.provider.X509Factory;
+
+import java.io.*;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
+import java.security.cert.CertificateEncodingException;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
@@ -28,7 +40,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-import java.io.IOException;
 import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -229,4 +240,28 @@ public class AdminController {
 
         return dozvoljeni;
     };
+
+    @GetMapping(value = "/download/{id}/{name}/{ca}")
+    public void downloadCertificate(@PathVariable String id, @PathVariable String name, @PathVariable Boolean ca) throws IOException, CertificateEncodingException {
+
+        KeyStoreWriter ks=new KeyStoreWriter();
+        char[] array = "tim14".toCharArray();
+        KeyStoreReader kr = new KeyStoreReader();
+        X509Certificate cert = null;
+
+        if(ca==true){
+            ks.loadKeyStore("endCertificate.jks",array);//ustvari treba intermediate da ucita
+            cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
+        }else{
+            ks.loadKeyStore("endCertificate.jks",array);
+            cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
+        }
+
+        FileWriter fileWriter = new FileWriter(id+"_"+name+"_Certificate.txt");
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        printWriter.print(cert.toString());
+        printWriter.close();
+
+    };
+
 }
