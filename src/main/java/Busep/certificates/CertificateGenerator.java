@@ -14,7 +14,9 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 
+import Busep.ModelDTO.ExtensionDTO;
 import Busep.ModelDTO.SubjectDTO;
 import Busep.model.Subject;
 import keyStore.KeyStoreReader;
@@ -37,6 +39,7 @@ import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import sun.security.x509.KeyUsageExtension;
 
 
 public class CertificateGenerator {
@@ -50,7 +53,8 @@ public class CertificateGenerator {
             KeyPair keyPair,
             final String hashAlgorithm,
 
-            final int days)
+            final int days,
+            ExtensionDTO extensionDTO)
             throws OperatorCreationException, CertificateException, IOException {
 
         //System.out.println(subjectDTO.getName());
@@ -83,36 +87,116 @@ public class CertificateGenerator {
 
         Boolean isCa = subjectDTO.isCA();
 
-        KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign);
-        X509Certificate certRoot = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subjectDTO2.getId().toString());
-        System.out.println(certRoot);
-        final X509v3CertificateBuilder certificateBuilder =
-                new JcaX509v3CertificateBuilder( certRoot,
-                        BigInteger.valueOf(now.toEpochMilli()),
-                        notBefore,
-                        notAfter,
-                        nameBuilder.build(),
-                        keyPair.getPublic())
-                        .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
-                        .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
-                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
-                       // .addExtension(Extension.keyUsage, true, keyUse);
+        boolean dig = false;
+        boolean non = false;
+        boolean agr =false;
+        boolean enc = false;
+
+        dig =   extensionDTO.getDigitalSignature() == true ? true : false;
+        non =   extensionDTO.getNonRepudiation() == true ? true : false;
+        agr =   extensionDTO.getKeyAgreement() == true ? true : false;
+        enc =   extensionDTO.getKeyEncipherment() == true ? true : false;
+
+        KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign |
+                (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.keyCertSign )
+                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.keyCertSign  )
+                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.keyCertSign )
+                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.keyCertSign ));
 
 
 
-        return new JcaX509CertificateConverter()
-                .setProvider(new BouncyCastleProvider()).getCertificate(certificateBuilder.build(contentSigner));
+        if(isCa == true) {
+
+
+            X509Certificate certRoot = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subjectDTO2.getId().toString());
+            System.out.println(certRoot);
+            final X509v3CertificateBuilder certificateBuilder =
+                    new JcaX509v3CertificateBuilder( certRoot,
+                            BigInteger.valueOf(now.toEpochMilli()),
+                            notBefore,
+                            notAfter,
+                            nameBuilder.build(),
+                            keyPair.getPublic())
+                            .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa))
+                            .addExtension(Extension.keyUsage, true, keyUse);
+
+
+
+            return new JcaX509CertificateConverter()
+                    .setProvider(new BouncyCastleProvider()).getCertificate(certificateBuilder.build(contentSigner));
+        } else {
+
+            X509Certificate certRoot = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subjectDTO2.getId().toString());
+            System.out.println(certRoot);
+            final X509v3CertificateBuilder certificateBuilder =
+                    new JcaX509v3CertificateBuilder(certRoot,
+                            BigInteger.valueOf(now.toEpochMilli()),
+                            notBefore,
+                            notAfter,
+                            nameBuilder.build(),
+                            keyPair.getPublic())
+                            .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+
+        if    (dig == true) {
+
+                KeyUsage  keyUseEnd = new KeyUsage(
+                        (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.digitalSignature )
+                                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.digitalSignature  )
+                                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.digitalSignature )
+                                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.digitalSignature ));
+                certificateBuilder.addExtension(Extension.keyUsage, true, keyUseEnd);
+
+            } else if(non == true) {
+                KeyUsage keyUseEnd = new KeyUsage(
+                        (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.nonRepudiation )
+                                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.nonRepudiation  )
+                                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.nonRepudiation )
+                                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.nonRepudiation ));
+                certificateBuilder.addExtension(Extension.keyUsage, true, keyUseEnd);
+            }
+            else if(agr == true) {
+                KeyUsage keyUseEnd = new KeyUsage(
+                        (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.keyAgreement )
+                                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.keyAgreement  )
+                                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.keyAgreement )
+                                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.keyAgreement ));
+                certificateBuilder.addExtension(Extension.keyUsage, true, keyUseEnd);
+            }
+            else if( enc == true) {
+                KeyUsage keyUseEnd = new KeyUsage(
+                        (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.keyEncipherment )
+                                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.keyEncipherment  )
+                                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.keyEncipherment )
+                                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.keyEncipherment ));
+                certificateBuilder.addExtension(Extension.keyUsage, true, keyUseEnd);
+            }
+
+
+
+
+
+            return new JcaX509CertificateConverter()
+                    .setProvider(new BouncyCastleProvider()).getCertificate(certificateBuilder.build(contentSigner));
+
+        }
+
+
     }
 
 
 
 
     public static X509Certificate generateInter(
-                                            SubjectDTO subjectDTO,
-                                            KeyPair keyPair,
-                                           final String hashAlgorithm,
+            SubjectDTO subjectDTO,
+            KeyPair keyPair,
+            final String hashAlgorithm,
 
-                                           final int days)
+            final int days,
+            ExtensionDTO extensionDTO)
             throws OperatorCreationException, CertificateException, IOException, ParseException {
 
         System.out.println(subjectDTO.getName());
@@ -141,9 +225,29 @@ public class CertificateGenerator {
         System.out.println(pk);
         final ContentSigner contentSigner = new JcaContentSignerBuilder(hashAlgorithm).build(pk);
 
+        boolean dig = false;
+        boolean non = false;
+        boolean agr =false;
+        boolean enc = false;
+
+      dig =   extensionDTO.getDigitalSignature() == true ? true : false;
+      non =   extensionDTO.getNonRepudiation() == true ? true : false;
+      agr =   extensionDTO.getKeyAgreement() == true ? true : false;
+      enc =   extensionDTO.getKeyEncipherment() == true ? true : false;
+
+        KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign |
+                (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.keyCertSign )
+                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.keyCertSign  )
+                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.keyCertSign )
+                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.keyCertSign ));
 
 
-        KeyUsage keyUse = new KeyUsage(KeyUsage.keyCertSign);
+
+
+
+
+
+
        X509Certificate certRoot = (X509Certificate) kr.readCertificate("rootCertificate.jks", "tim14", "root");
 
        Date certRDate = certRoot.getNotAfter();
@@ -156,22 +260,83 @@ public class CertificateGenerator {
 
         Boolean isCa = subjectDTO.isCA();
 
-        final X509v3CertificateBuilder certificateBuilder =
-                new JcaX509v3CertificateBuilder( certRoot,
-                        BigInteger.valueOf(now.toEpochMilli()),
-                        notBefore,
-                        notAfter,
-                        nameBuilder.build(),
-                        keyPair.getPublic())
-                        .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
-                        .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
-                        .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
-                       // .addExtension(Extension.keyUsage, true, keyUse);
+        if(isCa == true) {
+            System.out.println("usao");
+            final X509v3CertificateBuilder certificateBuilder =
+                    new JcaX509v3CertificateBuilder( certRoot,
+                            BigInteger.valueOf(now.toEpochMilli()),
+                            notBefore,
+                            notAfter,
+                            nameBuilder.build(),
+                            keyPair.getPublic())
+                            .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa))
+                            .addExtension(Extension.keyUsage, true, keyUse);
 
 
 
-        return new JcaX509CertificateConverter()
-                .setProvider(new BouncyCastleProvider()).getCertificate(certificateBuilder.build(contentSigner));
+
+            return new JcaX509CertificateConverter()
+                    .setProvider(new BouncyCastleProvider()).getCertificate(certificateBuilder.build(contentSigner));
+        }
+        else {
+
+            final X509v3CertificateBuilder certificateBuilder =
+                    new JcaX509v3CertificateBuilder(certRoot,
+                            BigInteger.valueOf(now.toEpochMilli()),
+                            notBefore,
+                            notAfter,
+                            nameBuilder.build(),
+                            keyPair.getPublic())
+                            .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+
+
+
+
+            if(dig == true) {
+
+                KeyUsage  keyUseEnd = new KeyUsage(
+                        (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.digitalSignature )
+                                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.digitalSignature  )
+                                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.digitalSignature )
+                                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.digitalSignature ));
+                certificateBuilder.addExtension(Extension.keyUsage, true, keyUseEnd);
+
+            } else if(non == true) {
+                KeyUsage keyUseEnd = new KeyUsage(
+                        (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.nonRepudiation )
+                                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.nonRepudiation  )
+                                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.nonRepudiation )
+                                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.nonRepudiation ));
+                certificateBuilder.addExtension(Extension.keyUsage, true, keyUseEnd);
+            }
+            else if(agr == true) {
+                KeyUsage keyUseEnd = new KeyUsage(
+                        (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.keyAgreement )
+                                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.keyAgreement  )
+                                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.keyAgreement )
+                                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.keyAgreement ));
+                certificateBuilder.addExtension(Extension.keyUsage, true, keyUseEnd);
+            }
+            else if( enc == true) {
+                KeyUsage keyUseEnd = new KeyUsage(
+                        (extensionDTO.getDigitalSignature() == true ? KeyUsage.digitalSignature : KeyUsage.keyEncipherment )
+                                | (extensionDTO.getNonRepudiation() == true ? KeyUsage.nonRepudiation : KeyUsage.keyEncipherment  )
+                                | (extensionDTO.getKeyAgreement() == true ? KeyUsage.keyAgreement : KeyUsage.keyEncipherment )
+                                | (extensionDTO.getKeyEncipherment() == true ? KeyUsage.keyEncipherment : KeyUsage.keyEncipherment ));
+                certificateBuilder.addExtension(Extension.keyUsage, true, keyUseEnd);
+            }
+
+
+
+
+
+            return new JcaX509CertificateConverter()
+                    .setProvider(new BouncyCastleProvider()).getCertificate(certificateBuilder.build(contentSigner));
+        }
     }
 
 

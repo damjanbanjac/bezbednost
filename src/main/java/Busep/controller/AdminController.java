@@ -2,6 +2,7 @@ package Busep.controller;
 
 
 import Busep.ModelDTO.AdminDTO;
+import Busep.ModelDTO.ExtensionDTO;
 import Busep.ModelDTO.SubjectDTO;
 import Busep.Repository.SubjectRepository;
 import Busep.Services.AdminServices;
@@ -15,8 +16,13 @@ import org.bouncycastle.asn1.dvcs.Data;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
+import java.lang.reflect.Field;
+
 import sun.misc.BASE64Encoder;
 import sun.security.provider.X509Factory;
 
@@ -26,6 +32,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.security.cert.CertificateEncodingException;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
@@ -74,14 +81,22 @@ public class AdminController {
 
 
 
-    @PostMapping(value="/addCertificate/{check}/{dani}/{zahtevId}")
-    public void createCertificate(@PathVariable String check, @PathVariable String dani, @PathVariable String zahtevId) throws CertificateException, OperatorCreationException, IOException, ParseException {
+    @PostMapping(value="/addCertificate/{check}/{dani}/{zahtevId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void createCertificate(@PathVariable String check, @PathVariable String dani, @PathVariable String zahtevId,@RequestBody ExtensionDTO extension) throws CertificateException, OperatorCreationException, IOException, ParseException, NoSuchFieldException, IllegalAccessException {
 
         long num = Long.parseLong(zahtevId);
         int danii = Integer.parseInt(dani);
         Subject subject = subjectService.findOne((num));
         subject.setCert(true);
 
+        System.out.println("extension" + extension);
+
+        System.out.println("digital potpis" +extension.getDigitalSignature());
+
+
+     /*   Field field = clazz.getField("DigitalSignature");
+        Object fieldValue = field.get(extension);
+        System.out.println("Digital signature" + fieldValue); */
         if(check.equals("true")){
 
            subject.setCA(true);
@@ -92,15 +107,18 @@ public class AdminController {
         SubjectDTO subjectDTO= new SubjectDTO(subject);
         char[] array = "tim14".toCharArray();
         CertificateGenerator certgen= new CertificateGenerator();
-        Certificate certIn =certgen.generateInter(subjectDTO, keyPar, "SHA256WithRSAEncryption",danii);
+        Certificate certIn =certgen.generateInter(subjectDTO, keyPar, "SHA256WithRSAEncryption",danii,extension);
         ks.loadKeyStore("endCertificate.jks",array);
         ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
         ks.saveKeyStore("endCertificate.jks", array);
-        System.out.println(certIn);
+        KeyStoreReader kr=new KeyStoreReader();
+
+        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", zahtevId);
+        System.out.println(cert);
     };
 
-    @PostMapping(value="/addCertificate/{check}/{dani}/{zahtevId}/{issuerId}")
-    public void createCertificate(@PathVariable String check, @PathVariable String dani, @PathVariable String zahtevId,@PathVariable String issuerId) throws CertificateException, OperatorCreationException, IOException {
+    @PostMapping(value="/addCertificate/{check}/{dani}/{zahtevId}/{issuerId}",consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void createCertificate(@PathVariable String check, @PathVariable String dani, @PathVariable String zahtevId,@PathVariable String issuerId,@RequestBody ExtensionDTO extension) throws CertificateException, OperatorCreationException, IOException {
 
         long num = Long.parseLong(zahtevId);
         long isuerId = Long.parseLong(issuerId);
@@ -120,11 +138,14 @@ public class AdminController {
         SubjectDTO issuerDTO= new SubjectDTO(issuer);
         char[] array = "tim14".toCharArray();
         CertificateGenerator certgen= new CertificateGenerator();
-        Certificate certIn =certgen.generateInterAndEnd(subjectDTO, issuerDTO, keyPar, "SHA256WithRSAEncryption",danii);
+        Certificate certIn =certgen.generateInterAndEnd(subjectDTO, issuerDTO, keyPar, "SHA256WithRSAEncryption",danii,extension);
         ks.loadKeyStore("endCertificate.jks",array);
         ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
         ks.saveKeyStore("endCertificate.jks", array);
-        System.out.println(certIn);
+        KeyStoreReader kr=new KeyStoreReader();
+
+        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", zahtevId);
+        System.out.println(cert);
     };
 
     @GetMapping(value = "/getDani/{check}")
