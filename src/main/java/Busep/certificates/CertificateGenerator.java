@@ -78,11 +78,10 @@ public class CertificateGenerator {
 
         char[] array = "tim14".toCharArray();
         KeyStoreReader kr = new KeyStoreReader();
-        ks.loadKeyStore("endCertificate.jks",array);
+        ks.loadKeyStore("interCertificate.jks",array);
 
-        PrivateKey pk = kr.readPrivateKey("endCertificate.jks","tim14",subjectDTO2.getId().toString(),subjectDTO2.getId().toString());
-        System.out.println(subjectDTO2.getId());
-        System.out.println(pk);
+        PrivateKey pk = kr.readPrivateKey("interCertificate.jks","tim14",subjectDTO2.getId().toString(),subjectDTO2.getId().toString());
+
         final ContentSigner contentSigner = new JcaContentSignerBuilder(hashAlgorithm).build(pk);
 
         Boolean isCa = subjectDTO.isCA();
@@ -108,7 +107,8 @@ public class CertificateGenerator {
         if(isCa == true) {
 
 
-            X509Certificate certRoot = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subjectDTO2.getId().toString());
+
+            X509Certificate certRoot = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", subjectDTO2.getId().toString());
             System.out.println(certRoot);
             final X509v3CertificateBuilder certificateBuilder =
                     new JcaX509v3CertificateBuilder( certRoot,
@@ -128,7 +128,7 @@ public class CertificateGenerator {
                     .setProvider(new BouncyCastleProvider()).getCertificate(certificateBuilder.build(contentSigner));
         } else {
 
-            X509Certificate certRoot = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subjectDTO2.getId().toString());
+            X509Certificate certRoot = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", subjectDTO2.getId().toString());
             System.out.println(certRoot);
             final X509v3CertificateBuilder certificateBuilder =
                     new JcaX509v3CertificateBuilder(certRoot,

@@ -26,7 +26,14 @@ public class BusepApplication {
 
 	public static void main(String[] args) throws CertificateException, IOException, OperatorCreationException, KeyStoreException {
 		SpringApplication.run(BusepApplication.class, args);
-		/*KeyStore ksf = null;
+
+		/*KeyStoreWriter ks=new KeyStoreWriter();
+		char[] array = "tim14".toCharArray();
+		ks.loadKeyStore(null,array);
+		KeyStore ksf = null;
+
+		ks.saveKeyStore("interCertficate.jks", array);
+		KeyStore ksf = null;
 		KeyStoreWriter ks=new KeyStoreWriter();
 		char[] array = "tim14".toCharArray();
 

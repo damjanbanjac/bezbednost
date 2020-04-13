@@ -69,12 +69,12 @@ public class SubjectController {
         X509Certificate cert = null;
         KeyStoreWriter ks=new KeyStoreWriter();
         char[] array = "tim14".toCharArray();
-        ks.loadKeyStore("endCertificate.jks",array);
+        ks.loadKeyStore("interCertificate.jks",array);
         KeyStoreReader kr = new KeyStoreReader();
 
         for(Subject subject : subjects) {
             if(subject.isCert() == true && subject.isCA() == true) {
-                cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subject.getId().toString());
+                cert = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", subject.getId().toString());
                 if(ocspService.checkValidityOfParents(cert) == true) {
                     subjectDTOList.add(new SubjectDTO(subject));
                 }
@@ -106,14 +106,28 @@ public class SubjectController {
 
         KeyStoreWriter ks=new KeyStoreWriter();
         char[] array = "tim14".toCharArray();
-        ks.loadKeyStore("endCertificate.jks",array);
-        KeyStoreReader kr = new KeyStoreReader();
+        if(subject.isCA()==true){
+            ks.loadKeyStore("interCertificate.jks",array);
+            KeyStoreReader kr = new KeyStoreReader();
 
-        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subject.getId().toString());
-        Date datum = cert.getNotAfter();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-        String datumString = dateFormat.format(datum);
-        return new ResponseEntity<>(datumString, HttpStatus.OK);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", subject.getId().toString());
+            Date datum = cert.getNotAfter();
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+            String datumString = dateFormat.format(datum);
+            return new ResponseEntity<>(datumString, HttpStatus.OK);
+        }else{
+            ks.loadKeyStore("endCertificate.jks",array);
+            KeyStoreReader kr = new KeyStoreReader();
+
+            X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", subject.getId().toString());
+            Date datum = cert.getNotAfter();
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+            String datumString = dateFormat.format(datum);
+            return new ResponseEntity<>(datumString, HttpStatus.OK);
+        }
+
+
+
     }
 
 
