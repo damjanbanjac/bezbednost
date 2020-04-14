@@ -78,7 +78,7 @@ public class OCSPService {
     }
 
     public Boolean checkValidityOfParents(X509Certificate certificate) throws NullPointerException, CertificateEncodingException {
-        X509Certificate parent = null; //treba mu nekako izvuci parenta od certificate
+        X509Certificate parent = null;
         KeyStoreWriter ks=new KeyStoreWriter();
         char[] array = "tim14".toCharArray();
 
@@ -100,43 +100,25 @@ public class OCSPService {
         System.out.println(currentDate);
         validityData = checkDate(certificate);
         String end = "";
-     // while(true) {//end.equals("")){
 
-          System.out.println("usao u while");
-
-            if(!validity) {
-                //end = "notValid";
-                p = false;
-                return false;
-            }
-
-        if(!validityData) {
+        if(!validity) {
             //end = "notValid";
             p = false;
             return false;
         }
 
-
-
-
-            /*if(false)
-                return false; */ //ovde treba proveriti digitalni potpis
-
-           else  if (alias.equals("123456")) {
-                System.out.println("usao");
-                end = "end";
-                p = true;
-                return true;
-
-            }
-
-
-           else  {
-              System.out.println("prosao");
-             return checkValidityOfParents(parent);
-
-        //  }
-
+        if(!validityData) {
+            //end = "notValid";
+            p = false;
+            return false;
+        } else  if (alias.equals("123456")) {
+            System.out.println("usao");
+            end = "end";
+            p = true;
+            return true;
+        } else  {
+          System.out.println("prosao");
+         return checkValidityOfParents(parent);
         }
 
     }
@@ -147,24 +129,18 @@ public class OCSPService {
         if(certificate == null){
             return false;
         }
-
-
-            Date certDate = certificate.getNotAfter();
-            final Instant now = Instant.now();
-            final Date nowDate = Date.from(now);
-            if(certDate.compareTo(nowDate) > 0) {
-                System.out.println(certDate);
-                System.out.println(nowDate);
-                System.out.println("veci je");
-                return true;
-            }
-            else {
-                return false;
-            }
-
-
-
-
+        Date certDate = certificate.getNotAfter();
+        final Instant now = Instant.now();
+        final Date nowDate = Date.from(now);
+        if(certDate.compareTo(nowDate) > 0) {
+            System.out.println(certDate);
+            System.out.println(nowDate);
+            System.out.println("veci je");
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
 }

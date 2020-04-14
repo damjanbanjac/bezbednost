@@ -20,12 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.lang.reflect.Field;
-
-import sun.misc.BASE64Encoder;
-import sun.security.provider.X509Factory;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.channels.Channels;
