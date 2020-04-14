@@ -87,9 +87,9 @@ public class OCSPService {
         String alias = IETFUtils.valueToString(uid.getFirst().getValue());
         System.out.println(alias);
 
-        ks.loadKeyStore("endCertificate.jks",array);
+        ks.loadKeyStore("interCertificate.jks",array);
         KeyStoreReader kr = new KeyStoreReader();
-        parent = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", alias);
+        parent = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", alias);
 
         boolean validity;
         boolean validityData;

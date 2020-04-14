@@ -46,12 +46,19 @@ public class OcspController {
         Subject subject = subjectService.findOne((num));
         KeyStoreWriter ks=new KeyStoreWriter();
         char[] array = "tim14".toCharArray();
-
-
-        ks.loadKeyStore("endCertificate.jks",array);
         KeyStoreReader kr = new KeyStoreReader();
-        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
-        ocspService.revokeCertificate(cert);
+
+        if(subject.isCA()==true){
+            ks.loadKeyStore("interCertificate.jks",array);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", id);
+            ocspService.revokeCertificate(cert);
+        }else{
+            ks.loadKeyStore("endCertificate.jks",array);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
+            ocspService.revokeCertificate(cert);
+        }
+
+
 
     };
 
@@ -62,13 +69,21 @@ public class OcspController {
         Subject subject = subjectService.findOne((num));
         KeyStoreWriter ks=new KeyStoreWriter();
         char[] array = "tim14".toCharArray();
-
-
-        ks.loadKeyStore("endCertificate.jks",array);
         KeyStoreReader kr = new KeyStoreReader();
-        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
-        Boolean validan = ocspService.checkValidityOfParents(cert);
-        return validan;
+
+        if(subject.isCA()==true){
+            ks.loadKeyStore("interCertificate.jks",array);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", id);
+            Boolean validan = ocspService.checkValidityOfParents(cert);
+            return validan;
+        }else{
+            ks.loadKeyStore("endCertificate.jks",array);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
+            Boolean validan = ocspService.checkValidityOfParents(cert);
+            return validan;
+        }
+
+
 
     };
 

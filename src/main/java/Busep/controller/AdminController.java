@@ -108,13 +108,21 @@ public class AdminController {
         char[] array = "tim14".toCharArray();
         CertificateGenerator certgen= new CertificateGenerator();
         Certificate certIn =certgen.generateInter(subjectDTO, keyPar, "SHA256WithRSAEncryption",danii,extension);
-        ks.loadKeyStore("endCertificate.jks",array);
-        ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
-        ks.saveKeyStore("endCertificate.jks", array);
         KeyStoreReader kr=new KeyStoreReader();
+        if(check.equals("true")){
+            ks.loadKeyStore("interCertificate.jks",array);
+            ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
+            ks.saveKeyStore("interCertificate.jks", array);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", zahtevId);
+            System.out.println(cert);
+        }else{
+            ks.loadKeyStore("endCertificate.jks",array);
+            ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
+            ks.saveKeyStore("endCertificate.jks", array);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", zahtevId);
+            System.out.println(cert);
+        }
 
-        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", zahtevId);
-        System.out.println(cert);
     };
 
     @PostMapping(value="/addCertificate/{check}/{dani}/{zahtevId}/{issuerId}",consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -139,13 +147,20 @@ public class AdminController {
         char[] array = "tim14".toCharArray();
         CertificateGenerator certgen= new CertificateGenerator();
         Certificate certIn =certgen.generateInterAndEnd(subjectDTO, issuerDTO, keyPar, "SHA256WithRSAEncryption",danii,extension);
-        ks.loadKeyStore("endCertificate.jks",array);
-        ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
-        ks.saveKeyStore("endCertificate.jks", array);
         KeyStoreReader kr=new KeyStoreReader();
-
-        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", zahtevId);
-        System.out.println(cert);
+        if(check.equals("true")){
+            ks.loadKeyStore("interCertificate.jks",array);
+            ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
+            ks.saveKeyStore("interCertificate.jks", array);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", zahtevId);
+            System.out.println(cert);
+        }else{
+            ks.loadKeyStore("endCertificate.jks",array);
+            ks.write(subject.getId().toString(), keyPar.getPrivate() ,  subject.getId().toString().toCharArray(), certIn);
+            ks.saveKeyStore("endCertificate.jks", array);
+            X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", zahtevId);
+            System.out.println(cert);
+        }
     };
 
     @GetMapping(value = "/getDani/{check}")
@@ -200,11 +215,11 @@ public class AdminController {
         System.out.println(id+"ovo je nas id");
 
         KeyStoreWriter ks=new KeyStoreWriter();
-        ks.loadKeyStore("endCertificate.jks",array);
+        ks.loadKeyStore("interCertificate.jks",array);
 
         KeyStoreReader kr=new KeyStoreReader();
 
-        X509Certificate cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
+        X509Certificate cert = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", id);
 
         Instant now = Instant.now();
         Date pocetniDan = Date.from(now);
@@ -250,8 +265,8 @@ public class AdminController {
         X509Certificate cert = null;
 
         if(ca==true){
-            ks.loadKeyStore("endCertificate.jks",array);//ustvari treba intermediate da ucita
-            cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
+            ks.loadKeyStore("interCertificate.jks",array);//ustvari treba intermediate da ucita
+            cert = (X509Certificate) kr.readCertificate("interCertificate.jks", "tim14", id);
         }else{
             ks.loadKeyStore("endCertificate.jks",array);
             cert = (X509Certificate) kr.readCertificate("endCertificate.jks", "tim14", id);
