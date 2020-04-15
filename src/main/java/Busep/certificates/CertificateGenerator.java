@@ -117,7 +117,7 @@ public class CertificateGenerator {
                             nameBuilder.build(),
                             keyPair.getPublic())
                             .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
-                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(certRoot.getPublicKey()))
                             .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa))
                             .addExtension(Extension.keyUsage, true, keyUse);
 
@@ -137,7 +137,7 @@ public class CertificateGenerator {
                             nameBuilder.build(),
                             keyPair.getPublic())
                             .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
-                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(certRoot.getPublicKey()))
                             .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
 
         if    (dig == true) {
@@ -269,7 +269,7 @@ public class CertificateGenerator {
                             nameBuilder.build(),
                             keyPair.getPublic())
                             .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
-                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(certRoot.getPublicKey()))
                             .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa))
                             .addExtension(Extension.keyUsage, true, keyUse);
 
@@ -289,7 +289,7 @@ public class CertificateGenerator {
                             nameBuilder.build(),
                             keyPair.getPublic())
                             .addExtension(Extension.subjectKeyIdentifier, false, createSubjectKeyId(keyPair.getPublic()))
-                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(keyPair.getPublic()))
+                            .addExtension(Extension.authorityKeyIdentifier, false, createAuthorityKeyId(certRoot.getPublicKey()))
                             .addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
 
 

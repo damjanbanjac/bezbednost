@@ -69,13 +69,7 @@ public class OCSPService {
         return true;
     }
 
-    public boolean denyRevokation(X509Certificate certificate, long id) throws NullPointerException {
-        OCSP ocsp = ocspRepository.findOneBySerialNumber(certificate.getSerialNumber());
-        if (ocsp != null && ocsp.getAdminId() == id){
-            ocspRepository.deleteById(ocsp.getId());
-        } //mozemo staviti exception ako slucajno nije bio obrisan
-        return true;
-    }
+
 
     public Boolean checkValidityOfParents(X509Certificate certificate) throws NullPointerException, CertificateEncodingException {
         X509Certificate parent = null;
